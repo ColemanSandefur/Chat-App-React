@@ -1,0 +1,19 @@
+form {
+    input, button {
+        margin: .5rem 0;
+        border: none;
+        border-radius: 10px;
+        font-size: 2rem;
+    }
+    input {
+        background-color: #20232a;
+        color: white;
+        font-size: 2rem;
+    }
+    #authCookie {
+        visibility: collapse;
+    }
+    button {
+        background-color: #61dafb;
+    }
+}
