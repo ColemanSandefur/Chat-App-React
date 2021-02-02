@@ -1,5 +1,7 @@
 import { FetchResult, gql, MutationFunctionOptions, useMutation } from "@apollo/client";
 import React from "react";
+import { useContext } from "react";
+import { AuthData } from "../../App";
 
 const MESSAGE_MUTATION = gql`
     mutation SendMessage($authKey: String!, $message: String!) {
@@ -70,11 +72,12 @@ export default class ChatBox extends React.Component<{addMessage: (data: number[
 function GetData(
     data: (options?: MutationFunctionOptions<AddMessageData, AddMessageVars> | undefined) => Promise<FetchResult<AddMessageData, Record<any, any>, Record<any, any>>>, 
     onSubmit: (id: number) => void, 
-    message?: string
+    authKey: string,
+    message?: string,
 ) {
     if (message !== undefined) {
-        data({variables: {authKey: "key", message: message}}).then((value) => {
-            if (value.data === undefined || value.data === null ) {
+        data({variables: {authKey: authKey, message: message}}).then((value) => {
+            if (value.data === undefined || value.data === null || value.data.addMessage === null) {
                 return;
             }
 
@@ -84,22 +87,24 @@ function GetData(
 }
 
 function SubmitButton(props: {message?: string, onSubmit: (id: number) => void}) {
+    let authData = useContext(AuthData);
     const [sendKey] = useMutation<AddMessageData, AddMessageVars>(MESSAGE_MUTATION);
 
     return <button 
         onClick={(e) => {
-            GetData(sendKey, props.onSubmit, props.message);
+            GetData(sendKey, props.onSubmit, authData.authCookie + "", props.message);
         }}
     >send</button>
 }
 
 function InputText(props: {message?: string, onChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void, onSubmit: (id: number) => void}) {
+    let authData = useContext(AuthData);
     const [sendKey] = useMutation<AddMessageData, AddMessageVars>(MESSAGE_MUTATION);
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 
         if (e.key === 'Enter') {
-            GetData(sendKey, props.onSubmit, props.message)
+            GetData(sendKey, props.onSubmit, authData.authCookie + "", props.message)
             
             e.preventDefault();
         }

@@ -1,6 +1,9 @@
-import {io} from "socket.io-client";
+import SocketIO, {io} from "socket.io-client";
 
-const socket = io("http://localhost:5000");
+const socket: SocketIO.Socket = io("http://localhost:5000", {
+    withCredentials: true,
+});
+
 console.log("connected to server");
 
 export {socket};
