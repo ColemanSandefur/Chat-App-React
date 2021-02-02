@@ -1,7 +1,8 @@
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { gql, useLazyQuery } from "@apollo/client";
 import React, { useEffect, useState } from "react";
 import ChatBox from "./ChatBox";
 import "./Messages.scss";
+import {socket} from "../../services/SocketIO";
 
 const MESSAGE_QUERY = gql`
     query GetMessage($id: ID, $authKey: String){
@@ -37,7 +38,16 @@ export class Message extends React.Component<{isOwner: boolean, text: string}> {
 }
 
 const GetMessages = (props: {userID: number, id?: number}) => {
+    const [getMessage, {loading, data, error}] = useLazyQuery<GetMessageData, GetMessageVars>(MESSAGE_QUERY);
     let [messages, setMessages] = useState<{[id: number]: JSX.Element}>([]);
+
+    //on mount
+    useEffect(() => {
+        getMessage({variables: {authKey: "key", id: props.id}});
+        socket.on("New-Message", (id: number) => {
+            getMessage({variables: {authKey: "key", id: id}});
+        })
+    }, [getMessage, props.id])
 
     const cloneMap = (map: {[key: number]: any}) => {
         var newMap:{[key: number]: any} = {};
@@ -59,12 +69,10 @@ const GetMessages = (props: {userID: number, id?: number}) => {
 
     const updateMessages = (data: {id: number, message: JSX.Element}[]) => {
         let newMessages: {[id: number]: JSX.Element} = cloneMap(messages);
-        console.log(newMessages);
 
         let hasChanged = false;
 
         data.forEach(el => {
-            console.log(newMessages[el.id]);
             if (newMessages[el.id] === undefined) {
                 newMessages[el.id] = el.message;
                 hasChanged = true;
@@ -72,44 +80,27 @@ const GetMessages = (props: {userID: number, id?: number}) => {
         });
 
         if (hasChanged) {
-            console.log("setting data: ", newMessages)
             setMessages(newMessages);
         }
     }
 
-    /*
-        Get data from server
-    */
-
-    // const { loading, data, error } = useQuery<GetMessageData, GetMessageVars>(
-    //     MESSAGE_QUERY,
-    //     {variables: {authKey: "key", id: props.id}}
-    // );
-
-    const [getMessage, {loading, data, error}] = useLazyQuery<GetMessageData, GetMessageVars>(MESSAGE_QUERY);
-
-    //on mount
-    useEffect(() => {
-        getMessage({variables: {authKey: "key", id: props.id}});
-    }, [])
-    
-
-    if (loading) return <div></div>
+    // only continue past this if data is defined
     if (error) return <div>Error!</div>
-    if (data === undefined || data.message === null) return <div></div>
 
     /*
         Update messages
     */
 
-    let updateData = data.message.map((data) => {
-        // eslint-disable-next-line
-        let message = <Message isOwner={data.userID == props.userID} text={data.text} key={data.id}/>;
-        
-        return {id: data.id, message: message}
-    });
-
-    updateMessages(updateData);
+    if (data !== undefined && data !== null) {
+        let updateData = data.message.map((data) => {
+            // eslint-disable-next-line
+            let message = <Message isOwner={data.userID == props.userID} text={data.text} key={data.id}/>;
+            
+            return {id: data.id, message: message}
+        });
+    
+        updateMessages(updateData);
+    }
 
     /*
         Render
@@ -120,8 +111,8 @@ const GetMessages = (props: {userID: number, id?: number}) => {
             {toArray(messages)}
 
             <ChatBox addMessage={(data) => {
-                data.forEach(el => {
-                    getMessage({variables: {authKey: "key", id: el}});
+                data.forEach(id => {
+                    getMessage({variables: {authKey: "key", id: id}});
                 })
             }}/>
         </div>

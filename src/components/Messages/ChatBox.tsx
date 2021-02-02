@@ -1,11 +1,9 @@
 import { FetchResult, gql, MutationFunctionOptions, useMutation } from "@apollo/client";
 import React from "react";
-import { Message } from "./Messages";
 
 const MESSAGE_MUTATION = gql`
     mutation SendMessage($authKey: String!, $message: String!) {
         addMessage(authKey: $authKey, message: $message){
-            text,
             id
         }
     }
@@ -13,7 +11,6 @@ const MESSAGE_MUTATION = gql`
 
 interface AddMessageData {
     addMessage: {
-        text: string,
         id: number
     }
 }
@@ -25,21 +22,25 @@ interface AddMessageVars {
 
 interface ChatBoxState {
     inputText: string,
-    inputArea: EventTarget & HTMLTextAreaElement
+    inputArea?: EventTarget & HTMLTextAreaElement
 }
 
 export default class ChatBox extends React.Component<{addMessage: (data: number[]) => void}, ChatBoxState> {
     constructor(props: any) {
         super(props);
 
-        this.setState({inputText: ""});
+        this.state = {
+            inputText: ""
+        }
     }
 
     onSumbit = (id: number) => {
+        if (this.state.inputArea === undefined) {
+            return;
+        }
+
         let inputArea = this.state.inputArea;
         inputArea.value="";
-
-        this.props.addMessage([id]);
 
         this.setState({inputText: ""});
     }
@@ -54,16 +55,8 @@ export default class ChatBox extends React.Component<{addMessage: (data: number[
     }
 
     render() {
-        let inputText;
-        let submitButton;
-
-        if (this.state != null) {
-            inputText = <InputText onChange={this.handleChange} onSubmit={this.onSumbit} message={this.state.inputText} />
-            submitButton = <SubmitButton message={this.state.inputText} onSubmit={this.onSumbit} />
-        } else {
-            inputText = <InputText onChange={this.handleChange} onSubmit={this.onSumbit} />
-            submitButton = <SubmitButton onSubmit={this.onSumbit} />
-        }
+        let inputText = <InputText message={this.state.inputText} onChange={this.handleChange} onSubmit={this.onSumbit} />
+        let submitButton = <SubmitButton message={this.state.inputText} onSubmit={this.onSumbit} />
 
         return (
             <div className="chat-box">
