@@ -50,6 +50,10 @@ const GetMessages = (props: {userID: number, id?: number}) => {
         socket.on("New-Message", (id: number) => {
             getMessage({variables: {authKey: authData.authCookie, id: id}});
         })
+
+        return () => {
+            socket.off("New-Message");
+        }
     }, [getMessage, props.id, authData])
 
     const cloneMap = (map: {[key: number]: any}) => {

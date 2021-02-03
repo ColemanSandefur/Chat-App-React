@@ -15,11 +15,9 @@ import {socket} from "./services/SocketIO";
 import LoginPage from './components/Login/LoginPage';
 
 
-export const AuthData = createContext<{authCookie?: string, loggedIn: boolean}>({
-  loggedIn: false
-});
+export const AuthData = createContext<{authCookie?: string, loggedIn?: boolean}>({});
 
-class App extends React.Component<{}, {authData:{authCookie: string, loggedIn: boolean}}> {
+class App extends React.Component<{}, {authData:{authCookie: string, loggedIn?: boolean}}> {
   constructor(props: any) {
     super(props);
     let cookies = new Cookies();
@@ -27,7 +25,6 @@ class App extends React.Component<{}, {authData:{authCookie: string, loggedIn: b
     this.state = {
       authData: {
         authCookie: cookies.get("authCookie") + "",
-        loggedIn: false
       }
     };
   }
@@ -40,6 +37,10 @@ class App extends React.Component<{}, {authData:{authCookie: string, loggedIn: b
       cookies.set("authCookie", cookie);
       this.setState({authData: {authCookie: cookie, loggedIn: loggedIn}});
     });
+  }
+
+  componentWillUnmount() {
+    socket.off("Send-Auth-Cookie");
   }
 
   render() {
