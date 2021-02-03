@@ -1,7 +1,7 @@
 import { FetchResult, gql, MutationFunctionOptions, useMutation } from "@apollo/client";
 import React from "react";
 import { useContext } from "react";
-import { AuthData } from "../../App";
+import { AuthData } from "../contexts/AuthData";
 
 const MESSAGE_MUTATION = gql`
     mutation SendMessage($authKey: String!, $message: String!) {
@@ -27,7 +27,7 @@ interface ChatBoxState {
     inputArea?: EventTarget & HTMLTextAreaElement
 }
 
-export default class ChatBox extends React.Component<{addMessage: (data: number[]) => void}, ChatBoxState> {
+export default class ChatBox extends React.Component<{}, ChatBoxState> {
     constructor(props: any) {
         super(props);
 
@@ -75,7 +75,7 @@ function GetData(
     authKey: string,
     message?: string,
 ) {
-    if (message !== undefined) {
+    if (message !== undefined && message.trim().length > 0) {
         data({variables: {authKey: authKey, message: message}}).then((value) => {
             if (value.data === undefined || value.data === null || value.data.addMessage === null) {
                 return;

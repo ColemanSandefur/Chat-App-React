@@ -13,11 +13,15 @@ import client from './services/ApiClient';
 import Cookies from "universal-cookie";
 import {socket} from "./services/SocketIO";
 import LoginPage from './components/Login/LoginPage';
+import { AuthData, AuthDataType } from './components/contexts/AuthData';
+import { DisplayData, DisplayDataType } from './components/contexts/DisplayData';
 
+export interface AppState {
+  authData: AuthDataType,
+  displayData: DisplayDataType
+}
 
-export const AuthData = createContext<{authCookie?: string, loggedIn?: boolean}>({});
-
-class App extends React.Component<{}, {authData:{authCookie: string, loggedIn?: boolean}}> {
+class App extends React.Component<{}, AppState> {
   constructor(props: any) {
     super(props);
     let cookies = new Cookies();
@@ -25,6 +29,9 @@ class App extends React.Component<{}, {authData:{authCookie: string, loggedIn?: 
     this.state = {
       authData: {
         authCookie: cookies.get("authCookie") + "",
+      },
+      displayData: {
+        isMobile: true
       }
     };
   }
@@ -54,18 +61,20 @@ class App extends React.Component<{}, {authData:{authCookie: string, loggedIn?: 
     return (
       <ApolloProvider client={client}>
         <AuthData.Provider value={this.state.authData}>
-          <div className="App">
-            <div className="App-header">
-              <Router>
-                {data}
-                <Switch>
-                  <Route path="/messages" render={() => <Messages />}></Route>
-                  <Route path="/login" render={() => <LoginPage />}></Route>
-                  <Route path="/">Hello, World!</Route>
-                </Switch>
-              </Router>
+          <DisplayData.Provider value={this.state.displayData} >
+            <div className="App">
+              <div className="App-header">
+                <Router>
+                  {data}
+                  <Switch>
+                    <Route path="/messages" render={() => <Messages />}></Route>
+                    <Route path="/login" render={() => <LoginPage />}></Route>
+                    <Route path="/">Hello, World!</Route>
+                  </Switch>
+                </Router>
+              </div>
             </div>
-          </div>
+          </DisplayData.Provider>
         </AuthData.Provider>
       </ApolloProvider>
     );

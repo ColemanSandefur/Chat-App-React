@@ -3,7 +3,8 @@ import React, { useContext, useEffect, useState } from "react";
 import ChatBox from "./ChatBox";
 import "./Messages.scss";
 import {socket} from "../../services/SocketIO";
-import {AuthData} from "../../App";
+import {AuthData} from "../contexts/AuthData";
+import { useRef } from "react";
 
 const MESSAGE_QUERY = gql`
     query GetMessage($id: ID, $authKey: String){
@@ -42,6 +43,7 @@ const GetMessages = (props: {userID: number, id?: number}) => {
     const [getMessage, {data, error}] = useLazyQuery<GetMessageData, GetMessageVars>(MESSAGE_QUERY);
     let [messages, setMessages] = useState<{[id: number]: JSX.Element}>([]);
     let authData = useContext(AuthData);
+    let lastMessageRef: React.RefObject<HTMLDivElement> = useRef(null);
 
     //on mount
     useEffect(() => {
@@ -51,10 +53,21 @@ const GetMessages = (props: {userID: number, id?: number}) => {
             getMessage({variables: {authKey: authData.authCookie, id: id}});
         })
 
+        //on unmount
         return () => {
             socket.off("New-Message");
         }
-    }, [getMessage, props.id, authData])
+    }, [getMessage, props.id, authData]);
+
+    //on every update scroll to the last element
+    useEffect(() => {
+        const bounding = lastMessageRef.current?.getBoundingClientRect();
+
+        if (bounding !== undefined) {
+            lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+        
+    });
 
     const cloneMap = (map: {[key: number]: any}) => {
         var newMap:{[key: number]: any} = {};
@@ -116,12 +129,8 @@ const GetMessages = (props: {userID: number, id?: number}) => {
     return (
         <div className="messages-div">
             {toArray(messages)}
-
-            <ChatBox addMessage={(data) => {
-                data.forEach(id => {
-                    getMessage({variables: {authKey: "key", id: id}});
-                })
-            }}/>
+            <div ref={lastMessageRef} />
+            <ChatBox />
         </div>
     );
 }

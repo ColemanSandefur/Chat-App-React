@@ -1,4 +1,4 @@
-$message-margin: 1.5rem;
+$message-margin: 3rem;
 $chat-box-height: 3rem;
 $chat-box-padding: .5rem;
 
@@ -10,12 +10,13 @@ $chat-box-padding: .5rem;
 .message {
     display: block;
     font-size: 1.5rem;
-    padding: .5rem;
+    padding: 1rem;
     margin-right: $message-margin;
 
     div {
         display: inline-block;
-        max-width: 20rem;
+        hyphens: auto;
+        word-break: break-word;
         background-color: #20232a;
         border-radius: .5em;
         padding: .25rem;

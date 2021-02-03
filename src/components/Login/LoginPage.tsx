@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { useState } from "react";
 import { Redirect } from "react-router-dom";
 import Cookies from "universal-cookie";
-import { AuthData } from "../../App";
+import { AuthData } from "../contexts/AuthData";
 import "./LoginPage.scss";
 
 export default function LoginPage(props:{}) {
@@ -16,15 +16,19 @@ export default function LoginPage(props:{}) {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
+        if (username.trim().length < 1 || password.trim().length < 1) {
+            return;
+        }
+
         fetch("http://localhost:5000/login", {
-          method: "POST",
-          mode: "cors",
-          body: JSON.stringify({
-            username: username,
-            password: password,
-            authCookie: cookies.get("authCookie") + ""
-          }),
-          headers: { 'Content-Type': 'application/json'},
+            method: "POST",
+            mode: "cors",
+            body: JSON.stringify({
+                username: username,
+                password: password,
+                authCookie: cookies.get("authCookie") + ""
+            }),
+            headers: { 'Content-Type': 'application/json'},
         }).then(() => {});
     }
 
