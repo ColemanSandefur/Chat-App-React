@@ -4,8 +4,8 @@ import { useContext } from "react";
 import { AuthData } from "../contexts/AuthData";
 
 const MESSAGE_MUTATION = gql`
-    mutation SendMessage($authKey: String!, $message: String!) {
-        addMessage(authKey: $authKey, message: $message){
+    mutation SendMessage($authKey: String!, $message: String!, $chatID: ID!) {
+        addMessage(authKey: $authKey, message: $message, chatID: $chatID){
             id
         }
     }
@@ -19,7 +19,8 @@ interface AddMessageData {
 
 interface AddMessageVars {
     authKey: string,
-    message: string
+    message: string,
+    chatID: number
 }
 
 interface ChatBoxState {
@@ -27,7 +28,7 @@ interface ChatBoxState {
     inputArea?: EventTarget & HTMLTextAreaElement
 }
 
-export default class ChatBox extends React.Component<{}, ChatBoxState> {
+export default class ChatBox extends React.Component<{chatID: number}, ChatBoxState> {
     constructor(props: any) {
         super(props);
 
@@ -57,8 +58,8 @@ export default class ChatBox extends React.Component<{}, ChatBoxState> {
     }
 
     render() {
-        let inputText = <InputText message={this.state.inputText} onChange={this.handleChange} onSubmit={this.onSumbit} />
-        let submitButton = <SubmitButton message={this.state.inputText} onSubmit={this.onSumbit} />
+        let inputText = <InputText message={this.state.inputText} chatID={this.props.chatID} onChange={this.handleChange} onSubmit={this.onSumbit} />
+        let submitButton = <SubmitButton message={this.state.inputText} chatID={this.props.chatID} onSubmit={this.onSumbit} />
 
         return (
             <div className="chat-box">
@@ -72,11 +73,10 @@ export default class ChatBox extends React.Component<{}, ChatBoxState> {
 function GetData(
     data: (options?: MutationFunctionOptions<AddMessageData, AddMessageVars> | undefined) => Promise<FetchResult<AddMessageData, Record<any, any>, Record<any, any>>>, 
     onSubmit: (id: number) => void, 
-    authKey: string,
-    message?: string,
+    vars: AddMessageVars
 ) {
-    if (message !== undefined && message.trim().length > 0) {
-        data({variables: {authKey: authKey, message: message}}).then((value) => {
+    if (vars.message.trim().length > 0) {
+        data({variables: vars}).then((value) => {
             if (value.data === undefined || value.data === null || value.data.addMessage === null) {
                 return;
             }
@@ -86,25 +86,25 @@ function GetData(
     }
 }
 
-function SubmitButton(props: {message?: string, onSubmit: (id: number) => void}) {
+function SubmitButton(props: {message?: string, onSubmit: (id: number) => void, chatID: number}) {
     let authData = useContext(AuthData);
     const [sendKey] = useMutation<AddMessageData, AddMessageVars>(MESSAGE_MUTATION);
 
     return <button 
         onClick={(e) => {
-            GetData(sendKey, props.onSubmit, authData.authCookie + "", props.message);
+            GetData(sendKey, props.onSubmit, {authKey: authData.authCookie + "", message: props.message + "", chatID: props.chatID});
         }}
     >send</button>
 }
 
-function InputText(props: {message?: string, onChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void, onSubmit: (id: number) => void}) {
+function InputText(props: {message?: string, onChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void, onSubmit: (id: number) => void, chatID: number}) {
     let authData = useContext(AuthData);
     const [sendKey] = useMutation<AddMessageData, AddMessageVars>(MESSAGE_MUTATION);
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 
         if (e.key === 'Enter') {
-            GetData(sendKey, props.onSubmit, authData.authCookie + "", props.message)
+            GetData(sendKey, props.onSubmit, {authKey: authData.authCookie + "", message: props.message + "", chatID: props.chatID})
             
             e.preventDefault();
         }

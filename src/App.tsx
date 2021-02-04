@@ -1,4 +1,4 @@
-import React, { createContext } from 'react';
+import React from 'react';
 import './App.css';
 import {
   BrowserRouter as Router,
@@ -40,7 +40,6 @@ class App extends React.Component<{}, AppState> {
     let cookies = new Cookies();
 
     socket.on("Send-Auth-Cookie", (cookie: string, loggedIn: boolean) => {
-      console.log(cookie, loggedIn);
       cookies.set("authCookie", cookie);
       this.setState({authData: {authCookie: cookie, loggedIn: loggedIn}});
     });

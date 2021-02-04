@@ -5,28 +5,37 @@ import "./Messages.scss";
 import {socket} from "../../services/SocketIO";
 import {AuthData} from "../contexts/AuthData";
 import { useRef } from "react";
+import { SideBar } from "./SideBar";
+import { cloneMap, toArray } from "../../services/MapHelpers";
 
 const MESSAGE_QUERY = gql`
-    query GetMessage($id: ID, $authKey: String){
-        message(id: $id, authKey: $authKey){
-            text,
-            id,
-            userID
+    query GetMessage($id: ID, $authKey: String, $chatID: ID!){
+        chat(authKey: $authKey, chatID: $chatID) {
+            chatID,
+            message(authKey: $authKey, id: $id) {
+                text,
+                id,
+                userID
+            }
         }
     }
 `;
 
 interface GetMessageData {
-    message: {
-        text: string,
-        id: number,
-        userID: number
+    chat: {
+        chatID: number
+        message: {
+            text: string,
+            id: number,
+            userID: number
+        }[]
     }[]
 }
 
 interface GetMessageVars {
     id?: number;
     authKey?: string;
+    chatID: number
 }
 
 export class Message extends React.Component<{isOwner: boolean, text: string}> {
@@ -39,25 +48,25 @@ export class Message extends React.Component<{isOwner: boolean, text: string}> {
     }
 }
 
-const GetMessages = (props: {userID: number, id?: number}) => {
-    const [getMessage, {data, error}] = useLazyQuery<GetMessageData, GetMessageVars>(MESSAGE_QUERY);
-    let [messages, setMessages] = useState<{[id: number]: JSX.Element}>([]);
+const GetMessages = (props: {userID: number, id?: number, chatID: number}) => {
+    const [getMessage, {data, error}] = useLazyQuery<GetMessageData, GetMessageVars>(MESSAGE_QUERY, {fetchPolicy: "no-cache"});
+    let [messages, setMessages] = useState<{[id: number]: JSX.Element}>({});
     let authData = useContext(AuthData);
     let lastMessageRef: React.RefObject<HTMLDivElement> = useRef(null);
 
     //on mount
     useEffect(() => {
-        getMessage({variables: {authKey: authData.authCookie, id: props.id}});
+        getMessage({variables: {authKey: authData.authCookie, id: props.id, chatID: props.chatID}});
 
         socket.on("New-Message", (id: number) => {
-            getMessage({variables: {authKey: authData.authCookie, id: id}});
+            getMessage({variables: {authKey: authData.authCookie, id: id, chatID: props.chatID}});
         })
 
         //on unmount
         return () => {
             socket.off("New-Message");
         }
-    }, [getMessage, props.id, authData]);
+    }, [authData.authCookie, props.id, props.chatID, getMessage]);
 
     //on every update scroll to the last element
     useEffect(() => {
@@ -66,26 +75,7 @@ const GetMessages = (props: {userID: number, id?: number}) => {
         if (bounding !== undefined) {
             lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
         }
-        
     });
-
-    const cloneMap = (map: {[key: number]: any}) => {
-        var newMap:{[key: number]: any} = {};
-        for (var i in map) {
-            newMap[i] = map[i];
-        }
-        return newMap;
-    }
-
-    const toArray = (map: {[key: number]: any}) => {
-        let array: any = [];
-
-        Object.keys(map).forEach((el:any) => {
-            array.push(map[el]);
-        });
-
-        return array;
-    }
 
     const updateMessages = (data: {id: number, message: JSX.Element}[]) => {
         let newMessages: {[id: number]: JSX.Element} = cloneMap(messages);
@@ -111,14 +101,21 @@ const GetMessages = (props: {userID: number, id?: number}) => {
         Update messages
     */
 
-    if (data !== undefined && data !== null && data.message !== null) {
-        let updateData = data.message.map((data) => {
-            // eslint-disable-next-line
-            let message = <Message isOwner={data.userID == props.userID} text={data.text} key={data.id}/>;
+    if (data !== undefined && data !== null && data.chat !== null && data.chat[0].message !== null) {
+        let updateData: {
+            id: number;
+            message: JSX.Element;
+        }[] = [];
+
+        data.chat[0].message.forEach(data => {
+            if (data !== null) {
+                // eslint-disable-next-line
+                let message = <Message isOwner={data.userID == props.userID} text={data.text} key={data.id}/>;
                 
-            return {id: data.id, message: message}
+                updateData.push({id: data.id, message: message});
+            }
         });
-        
+            
         updateMessages(updateData);
     }
 
@@ -130,7 +127,7 @@ const GetMessages = (props: {userID: number, id?: number}) => {
         <div className="messages-div">
             {toArray(messages)}
             <div ref={lastMessageRef} />
-            <ChatBox />
+            <ChatBox chatID={props.chatID} />
         </div>
     );
 }
@@ -139,10 +136,22 @@ const GetMessages = (props: {userID: number, id?: number}) => {
     main component
 */
 
-class Messages extends React.Component<{}, {}> {
+class Messages extends React.Component<{}, {chatID: number}> {
+    constructor(props: any) {
+        super(props);
+
+        this.state = {
+            chatID: 0
+        }
+    }
+
     render() {
         return (
-            <GetMessages userID={0} key={0}/>
+            <div>
+                <SideBar setChat={(chat: number) => {this.setState({chatID: chat})}}></SideBar>
+                <GetMessages userID={0} chatID={this.state.chatID} key={this.state.chatID}/>
+            </div>
+            
         );
     }
 }
