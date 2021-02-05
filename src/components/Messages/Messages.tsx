@@ -38,17 +38,25 @@ interface GetMessageVars {
     chatID: number
 }
 
-export class Message extends React.Component<{isOwner: boolean, text: string}> {
-    render() {
-        let message = this.props.text
-        let className = "message " + (this.props.isOwner?" owner" : "");
-        return (
-            <div className={className}><div>{message}</div></div>
-        );
+const Message = (props: {messageUserID: number, text: string}) => {
+    let authData = useContext(AuthData);
+    let isOwner;
+
+    // eslint-disable-next-line
+    if (authData.userData === undefined || authData.userData.userID != props.messageUserID ) {
+        isOwner = false;
+    } else {
+        isOwner = true;
     }
+
+    let message = props.text;
+    let className = "message " + (isOwner?" owner" : "");
+    return (
+        <div className={className}><div>{message}</div></div>
+    );
 }
 
-const GetMessages = (props: {userID: number, id?: number, chatID: number}) => {
+const GetMessages = (props: {id?: number, chatID: number}) => {
     const [getMessage, {data, error}] = useLazyQuery<GetMessageData, GetMessageVars>(MESSAGE_QUERY, {fetchPolicy: "no-cache"});
     let [messages, setMessages] = useState<{[id: number]: JSX.Element}>({});
     let authData = useContext(AuthData);
@@ -110,7 +118,7 @@ const GetMessages = (props: {userID: number, id?: number, chatID: number}) => {
         data.chat[0].message.forEach(data => {
             if (data !== null) {
                 // eslint-disable-next-line
-                let message = <Message isOwner={data.userID == props.userID} text={data.text} key={data.id}/>;
+                let message = <Message messageUserID={data.userID} text={data.text} key={data.id}/>;
                 
                 updateData.push({id: data.id, message: message});
             }
@@ -149,7 +157,7 @@ class Messages extends React.Component<{}, {chatID: number}> {
         return (
             <div>
                 <SideBar setChat={(chat: number) => {this.setState({chatID: chat})}}></SideBar>
-                <GetMessages userID={0} chatID={this.state.chatID} key={this.state.chatID}/>
+                <GetMessages chatID={this.state.chatID} key={this.state.chatID}/>
             </div>
             
         );

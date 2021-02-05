@@ -18,7 +18,7 @@ import { DisplayData, DisplayDataType } from './components/contexts/DisplayData'
 
 export interface AppState {
   authData: AuthDataType,
-  displayData: DisplayDataType
+  displayData: DisplayDataType,
 }
 
 class App extends React.Component<{}, AppState> {
@@ -29,6 +29,9 @@ class App extends React.Component<{}, AppState> {
     this.state = {
       authData: {
         authCookie: cookies.get("authCookie") + "",
+        userData: {
+          userID: -1
+        }
       },
       displayData: {
         isMobile: true
@@ -39,9 +42,14 @@ class App extends React.Component<{}, AppState> {
   componentDidMount() {
     let cookies = new Cookies();
 
-    socket.on("Send-Auth-Cookie", (cookie: string, loggedIn: boolean) => {
+    socket.on("Send-Auth-Cookie", (cookie: string, loggedIn: boolean, userData?: {userID: number}) => {
       cookies.set("authCookie", cookie);
-      this.setState({authData: {authCookie: cookie, loggedIn: loggedIn}});
+
+      this.setState({authData: {
+        authCookie: cookie, 
+        loggedIn: loggedIn,
+        userData: userData
+      }});
     });
   }
 
