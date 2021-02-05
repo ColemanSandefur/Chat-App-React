@@ -52,6 +52,7 @@ $side-bar-color:#181b20;
     button, span {
         border-radius: .5rem;
         border: none;
+        box-shadow: .5px .5px 3px #131519;
     }
 
     button, textarea {
@@ -98,7 +99,7 @@ $side-bar-color:#181b20;
     box-sizing: border-box;
     padding: .25rem;
     gap: .25rem;
-    box-shadow: 1px 0px 3px #141619;
+    box-shadow: .5px 0px 3px #141619;
 
     .chat-room-link {
         width: 100%;

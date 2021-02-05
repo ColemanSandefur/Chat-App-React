@@ -6,14 +6,17 @@ import { AuthData } from "../contexts/AuthData";
 const CHAT_QUERY = gql`
     query GetChat($authKey: String, $chatID: ID){
         chat(authKey: $authKey, chatID: $chatID) {
-            chatID
+            chatID,
+            imageURL,
         }
     }
 `;
 
 interface ChatData {
-    chatID: number
+    chatID: number,
+    imageURL?: string
 }
+
 interface GetChatData {
     chat: ChatData[]
 }
@@ -25,7 +28,10 @@ interface GetChatVars {
 
 function ChatRoom(props: ChatData & {setChat: (chatID: number) => void}) {
     return (
-        <div className="chat-room-link" onClick={() => props.setChat(props.chatID)}>
+        <div className="chat-room-link" onClick={() => props.setChat(props.chatID)} style={{
+            backgroundImage: `url("${props.imageURL}")`,
+            backgroundSize: "contain"
+        }}>
 
         </div>
     )
