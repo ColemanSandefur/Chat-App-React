@@ -30,7 +30,7 @@ class App extends React.Component<{}, AppState> {
       authData: {
         authCookie: cookies.get("authCookie") + "",
         userData: {
-          userID: -1
+          userID: ""
         }
       },
       displayData: {
@@ -42,8 +42,7 @@ class App extends React.Component<{}, AppState> {
   componentDidMount() {
     let cookies = new Cookies();
 
-    socket.on("Send-Auth-Cookie", (cookie: string, loggedIn: boolean, userData?: {userID: number}) => {
-      console.log(cookie, loggedIn, userData);
+    socket.on("Send-Auth-Cookie", (cookie: string, loggedIn: boolean, userData?: {userID: string}) => {
       cookies.set("authCookie", cookie);
 
       this.setState({authData: {

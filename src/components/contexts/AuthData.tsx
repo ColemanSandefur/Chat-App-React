@@ -4,7 +4,7 @@ export interface AuthDataType {
     authCookie?: string, 
     loggedIn?: boolean, 
     userData?: {
-        userID: number
+        userID: string
     }
 }
 export const AuthData = createContext<AuthDataType>({});

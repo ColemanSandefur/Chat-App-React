@@ -9,7 +9,7 @@ import { SideBar } from "./SideBar";
 import { cloneMap, toArray } from "../../services/MapHelpers";
 
 const MESSAGE_QUERY = gql`
-    query GetMessage($id: ID, $authKey: String, $chatID: ID!){
+    query GetMessage($id: String, $authKey: String, $chatID: String!){
         chat(authKey: $authKey, chatID: $chatID) {
             chatID,
             message(authKey: $authKey, id: $id) {
@@ -23,22 +23,22 @@ const MESSAGE_QUERY = gql`
 
 interface GetMessageData {
     chat: {
-        chatID: number
+        chatID: string
         message: {
             text: string,
-            id: number,
-            userID: number
+            id: string,
+            userID: string
         }[]
     }[]
 }
 
 interface GetMessageVars {
-    id?: number;
+    id?: string;
     authKey?: string;
-    chatID: number
+    chatID: string
 }
 
-const Message = (props: {messageUserID: number, text: string}) => {
+const Message = (props: {messageUserID: string, text: string}) => {
     let authData = useContext(AuthData);
     let isOwner;
 
@@ -56,9 +56,9 @@ const Message = (props: {messageUserID: number, text: string}) => {
     );
 }
 
-const GetMessages = (props: {id?: number, chatID: number}) => {
+const GetMessages = (props: {id?: string, chatID: string}) => {
     const [getMessage, {data, error}] = useLazyQuery<GetMessageData, GetMessageVars>(MESSAGE_QUERY, {fetchPolicy: "no-cache"});
-    let [messages, setMessages] = useState<{[id: number]: JSX.Element}>({});
+    let [messages, setMessages] = useState<{[id: string]: JSX.Element}>({});
     let authData = useContext(AuthData);
     let lastMessageRef: React.RefObject<HTMLDivElement> = useRef(null);
 
@@ -66,7 +66,7 @@ const GetMessages = (props: {id?: number, chatID: number}) => {
     useEffect(() => {
         getMessage({variables: {authKey: authData.authCookie, id: props.id, chatID: props.chatID}});
 
-        socket.on("New-Message", (id: number) => {
+        socket.on("New-Message", (id: string) => {
             getMessage({variables: {authKey: authData.authCookie, id: id, chatID: props.chatID}});
         })
 
@@ -85,8 +85,8 @@ const GetMessages = (props: {id?: number, chatID: number}) => {
         }
     });
 
-    const updateMessages = (data: {id: number, message: JSX.Element}[]) => {
-        let newMessages: {[id: number]: JSX.Element} = cloneMap(messages);
+    const updateMessages = (data: {id: string, message: JSX.Element}[]) => {
+        let newMessages: {[id: string]: JSX.Element} = cloneMap(messages);
 
         let hasChanged = false;
 
@@ -111,7 +111,7 @@ const GetMessages = (props: {id?: number, chatID: number}) => {
 
     if (data !== undefined && data !== null && data.chat !== null && data.chat[0].message !== null) {
         let updateData: {
-            id: number;
+            id: string;
             message: JSX.Element;
         }[] = [];
 
@@ -144,19 +144,19 @@ const GetMessages = (props: {id?: number, chatID: number}) => {
     main component
 */
 
-class Messages extends React.Component<{}, {chatID: number}> {
+class Messages extends React.Component<{}, {chatID: string}> {
     constructor(props: any) {
         super(props);
 
         this.state = {
-            chatID: 0
+            chatID: ""
         }
     }
 
     render() {
         return (
             <div>
-                <SideBar setChat={(chat: number) => {this.setState({chatID: chat})}}></SideBar>
+                <SideBar chatID={this.state.chatID} setChat={(chat: string) => {this.setState({chatID: chat})}}></SideBar>
                 <GetMessages chatID={this.state.chatID} key={this.state.chatID}/>
             </div>
             

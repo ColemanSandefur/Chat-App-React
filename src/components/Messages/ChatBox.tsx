@@ -4,7 +4,7 @@ import { useContext } from "react";
 import { AuthData } from "../contexts/AuthData";
 
 const MESSAGE_MUTATION = gql`
-    mutation SendMessage($authKey: String!, $message: String!, $chatID: ID!) {
+    mutation SendMessage($authKey: String!, $message: String!, $chatID: String!) {
         addMessage(authKey: $authKey, message: $message, chatID: $chatID){
             id
         }
@@ -13,14 +13,14 @@ const MESSAGE_MUTATION = gql`
 
 interface AddMessageData {
     addMessage: {
-        id: number
+        id: string
     }
 }
 
 interface AddMessageVars {
     authKey: string,
     message: string,
-    chatID: number
+    chatID: string
 }
 
 interface ChatBoxState {
@@ -28,7 +28,7 @@ interface ChatBoxState {
     inputArea?: EventTarget & HTMLTextAreaElement
 }
 
-export default class ChatBox extends React.Component<{chatID: number}, ChatBoxState> {
+export default class ChatBox extends React.Component<{chatID: string}, ChatBoxState> {
     constructor(props: any) {
         super(props);
 
@@ -37,7 +37,7 @@ export default class ChatBox extends React.Component<{chatID: number}, ChatBoxSt
         }
     }
 
-    onSumbit = (id: number) => {
+    onSumbit = (id: string) => {
         if (this.state.inputArea === undefined) {
             return;
         }
@@ -72,7 +72,7 @@ export default class ChatBox extends React.Component<{chatID: number}, ChatBoxSt
 
 function GetData(
     data: (options?: MutationFunctionOptions<AddMessageData, AddMessageVars> | undefined) => Promise<FetchResult<AddMessageData, Record<any, any>, Record<any, any>>>, 
-    onSubmit: (id: number) => void, 
+    onSubmit: (id: string) => void, 
     vars: AddMessageVars
 ) {
     if (vars.message.trim().length > 0) {
@@ -86,7 +86,7 @@ function GetData(
     }
 }
 
-function SubmitButton(props: {message?: string, onSubmit: (id: number) => void, chatID: number}) {
+function SubmitButton(props: {message?: string, onSubmit: (id: string) => void, chatID: string}) {
     let authData = useContext(AuthData);
     const [sendKey] = useMutation<AddMessageData, AddMessageVars>(MESSAGE_MUTATION);
 
@@ -97,7 +97,7 @@ function SubmitButton(props: {message?: string, onSubmit: (id: number) => void, 
     >send</button>
 }
 
-function InputText(props: {message?: string, onChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void, onSubmit: (id: number) => void, chatID: number}) {
+function InputText(props: {message?: string, onChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void, onSubmit: (id: string) => void, chatID: string}) {
     let authData = useContext(AuthData);
     const [sendKey] = useMutation<AddMessageData, AddMessageVars>(MESSAGE_MUTATION);
 

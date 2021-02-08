@@ -89,10 +89,15 @@ $side-bar-color:#181b20;
     }
 }
 
+$chat-room-transition-duration: .15s;
+$chat-room-transition-timing: cubic-bezier(0.68, -0.55, 0.27, 1.55);
 .side-bar {
     background-color: $side-bar-color;
     width: $side-bar-width;
-    float:left;
+    // float:left;
+    position: fixed;
+    left: 0;
+    top: 0;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -100,6 +105,8 @@ $side-bar-color:#181b20;
     padding: .25rem;
     gap: .25rem;
     box-shadow: .5px 0px 3px #141619;
+    z-index: 1;
+    
 
     .chat-room-link {
         width: 100%;
@@ -110,8 +117,8 @@ $side-bar-color:#181b20;
         background-color: $dark-background-color;
         border-radius: $side-bar-width;
         cursor: pointer;
-        transition: border-radius .15s, box-shadow .15s;
-        transition-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        transition: border-radius $chat-room-transition-duration, box-shadow $chat-room-transition-duration;
+        transition-timing-function: $chat-room-transition-timing;
         box-shadow: 1px 1px 3px #141619;
         position: relative;
 
@@ -125,9 +132,10 @@ $side-bar-color:#181b20;
                 justify-content: center;
                 height: 100%;
                 width: 100%;
+                overflow: hidden;
 
-                transition: border-radius .15s, background-color .15s, color .5s;
-                transition-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+                transition: border-radius $chat-room-transition-duration, background-color $chat-room-transition-duration, color $chat-room-transition-duration;
+                transition-timing-function: $chat-room-transition-timing;
 
                 background-color: #00000000;
                 color: #ffffff00;
@@ -135,8 +143,8 @@ $side-bar-color:#181b20;
             }
 
             &:hover:after {
-                content: attr(data-tooltip);
-
+                transition: border-radius $chat-room-transition-duration, background-color $chat-room-transition-duration, color calc(#{$chat-room-transition-duration * 3.33});
+                transition-timing-function: $chat-room-transition-timing;
                 color: #ffffff;
                 background-color: #000000b0;
                 border-radius: 15px;
@@ -154,7 +162,7 @@ $side-bar-color:#181b20;
             // line-height: calc(#{$side-bar-width} - .5rem);
             align-items: center;
             padding: 1rem;
-            transition: all .15s;
+            transition: all $chat-room-transition-duration;
 
             div {
                 background-image: url(add.svg);
@@ -188,7 +196,7 @@ $side-bar-color:#181b20;
     background-color: #000000b0;
     z-index: 1;
 
-    div {
+    .add-chat {
         background-color: #282c34;
         max-width: 25rem;
         max-height: 15rem;
@@ -201,16 +209,46 @@ $side-bar-color:#181b20;
         align-items: center;
 
         input, button {
+            box-sizing: border-box;
             padding: .25rem;
             background-color: #131519;
             border: none;
             font-size: 1.5rem;
             border-radius: .5rem;
+            height: 2.5rem;
+            width: 100%;
             color: white
         }
 
+        input:focus, button:focus {
+            outline: none;
+            border: 2px solid white !important;
+            border-radius: .5rem;
+        }
+
         button {
+            cursor: pointer;
+        }
+
+        .create-chat {
             width: 5rem;
+        }
+
+        .close-chat {
+            text-align: end;
+            height: 1rem;
+            width: 100%;
+
+            .close-chat-button {
+                padding: 0;
+                background-image: url(add.svg);
+                background-size: contain;
+                height: 100%;
+                width: 1rem;
+
+                transform: rotate(45deg);
+            }
+            
         }
     }
 }
