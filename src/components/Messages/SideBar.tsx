@@ -56,17 +56,19 @@ export function SideBar(props: {chatID: string, setChat: (chatID: string) => voi
     let authData = useContext(AuthData);
     const [addChatOpen, setAddChatOpen] = useState<boolean>(false);
 
+    //get chats on first load
     useEffect(() => {
         getChat({variables: {authKey: authData.authCookie}});
     }, [getChat, authData]);
 
+    //if no chat is being displayed make a chat displayed
     useEffect(() => {
         if (props.chatID === "" && Object.keys(chats).length > 0) {
             props.setChat(Object.keys(chats)[0]);
         }
     }, [props, chats])
 
-    const updateMessages = (data: {id: string, chat: JSX.Element}[]) => {
+    const updateChats = (data: {id: string, chat: JSX.Element}[]) => {
         let newChats: {[id: string]: JSX.Element} = cloneMap(chats);
 
         let hasChanged = false;
@@ -99,7 +101,7 @@ export function SideBar(props: {chatID: string, setChat: (chatID: string) => voi
             return {id: data.chatID, chat};
         })
 
-        updateMessages(updateData)
+        updateChats(updateData)
     }
 
     let chatRoom = (addChatOpen === true)? <AddChat refreshSideBar={refreshSideBar} toggleVisibility={setDisplayingAddChat}/>: undefined;

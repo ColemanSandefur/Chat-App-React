@@ -5,11 +5,16 @@ $side-bar-width: 4rem;
 $dark-background-color:#20232a;
 $side-bar-color:#181b20;
 
+.messages-container {
+    display: flex;
+}
+
 .messages-div {
+    flex-grow: 1;
     position: relative;
     text-align: left;
     padding-bottom: $chat-box-height;
-    margin-left: $side-bar-width;
+    width: auto;
 }
 
 .message {
@@ -94,10 +99,9 @@ $chat-room-transition-timing: cubic-bezier(0.68, -0.55, 0.27, 1.55);
 .side-bar {
     background-color: $side-bar-color;
     width: $side-bar-width;
-    // float:left;
-    position: fixed;
-    left: 0;
-    top: 0;
+    // position: fixed;
+    // left: 0;
+    // top: 0;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -105,7 +109,7 @@ $chat-room-transition-timing: cubic-bezier(0.68, -0.55, 0.27, 1.55);
     padding: .25rem;
     gap: .25rem;
     box-shadow: .5px 0px 3px #141619;
-    z-index: 1;
+    z-index: 3;
     
 
     .chat-room-link {
@@ -115,7 +119,7 @@ $chat-room-transition-timing: cubic-bezier(0.68, -0.55, 0.27, 1.55);
         max-width: 100%;
         max-height: calc(#{$side-bar-width} - .5rem);
         background-color: $dark-background-color;
-        border-radius: $side-bar-width;
+        border-radius: calc(#{$side-bar-width} - .5rem);;
         cursor: pointer;
         transition: border-radius $chat-room-transition-duration, box-shadow $chat-room-transition-duration;
         transition-timing-function: $chat-room-transition-timing;

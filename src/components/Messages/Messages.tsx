@@ -62,7 +62,7 @@ const GetMessages = (props: {id?: string, chatID: string}) => {
     let authData = useContext(AuthData);
     let lastMessageRef: React.RefObject<HTMLDivElement> = useRef(null);
 
-    //on mount
+    //on mount; get messages in chat and listen for new ones
     useEffect(() => {
         getMessage({variables: {authKey: authData.authCookie, id: props.id, chatID: props.chatID}});
 
@@ -155,7 +155,7 @@ class Messages extends React.Component<{}, {chatID: string}> {
 
     render() {
         return (
-            <div>
+            <div className={"messages-container"}>
                 <SideBar chatID={this.state.chatID} setChat={(chat: string) => {this.setState({chatID: chat})}}></SideBar>
                 <GetMessages chatID={this.state.chatID} key={this.state.chatID}/>
             </div>

@@ -31,7 +31,7 @@ class App extends React.Component<{}, AppState> {
         authCookie: cookies.get("authCookie") + "",
         userData: {
           userID: ""
-        }
+        },
       },
       displayData: {
         isMobile: true
@@ -60,6 +60,9 @@ class App extends React.Component<{}, AppState> {
   render() {
     let data;
 
+    if (this.state.authData.loggedIn === undefined) {
+      return <div></div>
+    }
     //Redirect to login if you are not logged in
     if (this.state.authData.loggedIn === false) {
       data = <Redirect to={"/login"} />
