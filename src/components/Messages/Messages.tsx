@@ -5,7 +5,7 @@ import "./Messages.scss";
 import {socket} from "../../services/SocketIO";
 import {AuthData} from "../contexts/AuthData";
 import { useRef } from "react";
-import { SideBar } from "./SideBar";
+import { SideBar } from "./SideBar/SideBar";
 import { cloneMap, toArray } from "../../services/MapHelpers";
 
 const MESSAGE_QUERY = gql`
@@ -61,6 +61,8 @@ const GetMessages = (props: {id?: string, chatID: string}) => {
     let [messages, setMessages] = useState<{[id: string]: JSX.Element}>({});
     let authData = useContext(AuthData);
     let lastMessageRef: React.RefObject<HTMLDivElement> = useRef(null);
+    const [width, setWidth] = useState<number | undefined>();
+    const ref: React.RefObject<HTMLDivElement> = useRef(null);
 
     //on mount; get messages in chat and listen for new ones
     useEffect(() => {
@@ -84,6 +86,19 @@ const GetMessages = (props: {id?: string, chatID: string}) => {
             lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
         }
     });
+
+    useEffect(() => {
+        // console.log('width', ref.current ? ref.current.offsetWidth : 0);
+        if (ref.current !== null) {
+            setWidth(ref.current.offsetWidth);
+        }
+        window.addEventListener('resize', () => {
+            console.log('width', ref.current ? ref.current.offsetWidth : 0);
+            if (ref.current !== null) {
+                setWidth(ref.current.offsetWidth);
+            }
+        })
+    }, [messages]);
 
     const updateMessages = (data: {id: string, message: JSX.Element}[]) => {
         let newMessages: {[id: string]: JSX.Element} = cloneMap(messages);
@@ -132,10 +147,10 @@ const GetMessages = (props: {id?: string, chatID: string}) => {
     */
 
     return (
-        <div className="messages-div">
+        <div className="messages-div" ref={ref}>
             {toArray(messages)}
             <div ref={lastMessageRef} />
-            <ChatBox chatID={props.chatID} />
+            <ChatBox chatID={props.chatID} width={width}/>
         </div>
     );
 }

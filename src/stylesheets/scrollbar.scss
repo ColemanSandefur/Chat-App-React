@@ -1,0 +1,37 @@
+// custom scroll-bar
+@mixin custom-scroll-bar($background-color: #282c34, $thumb-color: #313131, $background-radius: 0px) {
+    &::-webkit-scrollbar {
+        border-radius: 10px;
+        height: 10px;
+        width: 8px;
+        background: rgba(0, 0, 0, 0);
+    }
+  
+    &::-webkit-scrollbar-thumb {
+        background: $thumb-color;
+        border-radius: 10px;
+    }
+  
+    &::-webkit-scrollbar-track {
+        background: $background-color;
+        border-radius: $background-radius;
+    }
+}
+  
+// no scroll bar
+@mixin no-scroll-bar() {
+    &::-webkit-scrollbar {
+        height: 0;
+        width: 0;
+    }
+  
+    &::-webkit-scrollbar-thumb {
+        height: 0;
+        width: 0;
+    }
+  
+    &::-webkit-scrollbar-track {
+        height: 0;
+        width: 0;
+    }
+}

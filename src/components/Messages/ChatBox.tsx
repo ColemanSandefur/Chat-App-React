@@ -28,7 +28,7 @@ interface ChatBoxState {
     inputArea?: EventTarget & HTMLTextAreaElement
 }
 
-export default class ChatBox extends React.Component<{chatID: string}, ChatBoxState> {
+export default class ChatBox extends React.Component<{chatID: string, width?: number}, ChatBoxState> {
     constructor(props: any) {
         super(props);
 
@@ -62,7 +62,11 @@ export default class ChatBox extends React.Component<{chatID: string}, ChatBoxSt
         let submitButton = <SubmitButton message={this.state.inputText} chatID={this.props.chatID} onSubmit={this.onSumbit} />
 
         return (
-            <div className="chat-box">
+            <div className="chat-box"
+                style={{
+                    width: this.props.width
+                }}
+            >
                 {submitButton}
                 {inputText}
             </div>

@@ -1,8 +1,10 @@
 import { gql, useLazyQuery } from "@apollo/client";
 import React, { useContext, useEffect, useState } from "react";
-import { cloneMap, toArray } from "../../services/MapHelpers";
-import { AuthData } from "../contexts/AuthData";
-import AddChat from "./AddChat";
+import { cloneMap, toArray } from "../../../services/MapHelpers";
+import { AuthData } from "../../contexts/AuthData";
+import AddChat from "../AddChat";
+import ChatSettings from "./ChatSettings";
+import "./SideBar.scss";
 
 const CHAT_QUERY = gql`
     query GetChat($authKey: String, $chatID: String){
@@ -107,10 +109,15 @@ export function SideBar(props: {chatID: string, setChat: (chatID: string) => voi
     let chatRoom = (addChatOpen === true)? <AddChat refreshSideBar={refreshSideBar} toggleVisibility={setDisplayingAddChat}/>: undefined;
 
     return (
-        <div className="side-bar">
-            {toArray(chats)}
-            <CreateChatRoom onClick={() => {setDisplayingAddChat(true)}}/>
-            {chatRoom}
+        <div className="side-bar-container">
+            <div className="chat-bar-container">
+                <div className="chat-bar">
+                    {toArray(chats)}
+                    <CreateChatRoom onClick={() => {setDisplayingAddChat(true)}}/>
+                    {chatRoom}
+                </div>
+            </div>
+            <ChatSettings />
         </div>
     )
 }
